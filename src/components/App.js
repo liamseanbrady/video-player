@@ -1,20 +1,29 @@
 import React from 'react'
 import SearchBar from './SearchBar'
+import VideoList from './VideoList'
+import { search } from '../apis/youtube'
 
 class App extends React.Component {
-  async onSubmit(term) {
-    const data = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&q=${term}&key=${process.env.REACT_APP_YT_API_KEY}`).then(response => {
-      return response.json()
-    }).catch(error => {
-      return error
-    })
+  state = {
+    videos: [],
+    selectedVideo: null
+  }
 
-    console.log(data)
+  onTermSubmit = (term) => {
+    search(term).then(async (response) => {
+      const videoData = await response.json()
+      const videos = videoData.items
+
+      this.setState({ videos })
+    })
   }
 
   render() {
     return (
-      <SearchBar onSubmit={this.onSubmit} />
+      <div className="ui container">
+        <SearchBar onTermSubmit={this.onTermSubmit} />
+        <VideoList videos={this.state.videos} />
+      </div>
     )
   }
 }
